@@ -82,3 +82,8 @@ test("controlled UI exposes accessible input, navigation and local callbacks", (
   assert.match(dock, /aria-current="page"/);
   assert.equal((dock.match(/<button/g) || []).length, 4);
 });
+
+test('npm entry points typecheck without framework CSS declarations',async()=>{
+ const{mkdtemp,mkdir,writeFile,symlink}=await import('node:fs/promises');const{tmpdir}=await import('node:os');const path=(await import('node:path')).default;const{execFileSync}=await import('node:child_process');const target=await mkdtemp(path.join(tmpdir(),'prismdeck-entries-'));const modules=path.join(target,'node_modules');await mkdir(path.join(modules,'@batype'),{recursive:true});await symlink(process.cwd(),path.join(modules,'@batype/prismdeck'));await symlink(path.resolve('node_modules/react'),path.join(modules,'react'));await symlink(path.resolve('node_modules/@types'),path.join(modules,'@types'));
+ const source=path.join(target,'App.tsx');await writeFile(source,"import {OrbitDial} from '@batype/prismdeck';\nimport {OrbitDial as NextDial} from '@batype/prismdeck/next';\nimport '@batype/prismdeck/style.css';\nexport default function App(){return <><OrbitDial value={64} onChange={()=>{}}/><NextDial value={64} onChange={()=>{}}/></>};\n");execFileSync(process.execPath,[path.resolve('node_modules/typescript/bin/tsc'),'--ignoreConfig','--noEmit','--target','ES2022','--module','ESNext','--moduleResolution','Bundler','--jsx','react-jsx','--strict','--skipLibCheck',source],{stdio:'pipe'});
+});

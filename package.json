@@ -1,6 +1,6 @@
 {
   "name": "@batype/prismdeck",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Configurable spatial React UI primitives with a live material lab and portable source export.",
   "license": "MIT",
@@ -28,7 +28,10 @@
       "types": "./lib/core/config.d.ts",
       "import": "./lib/core/config.js"
     },
-    "./style.css": "./lib/components/prism.css"
+    "./style.css": {
+      "types": "./lib/components/prism.css.d.ts",
+      "default": "./lib/components/prism.css"
+    }
   },
   "sideEffects": [
     "**/*.css"

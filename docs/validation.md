@@ -1,8 +1,8 @@
-# PrismDeck 1.0.0 验证
+# PrismDeck 1.0.1 验证
 
 2026-11-04，Node.js 24 / TypeScript 7 / React 19 / Vite 8。
 
-6 项行为测试通过：配置默认值及边界、Unicode 分享配置与异常恢复、轨道旋钮坐标与范围、三组件无浏览器全局变量的服务端渲染、React 文本转义及可访问输入、三种实际源码导出分别在独立 React TypeScript 工程中编译。
+7 项行为测试通过：配置默认值及边界、Unicode 分享配置与异常恢复、轨道旋钮坐标与范围、三组件无浏览器全局变量的服务端渲染、React 文本转义及可访问输入、三种实际源码导出分别在独立 React TypeScript 工程中编译。
 
 导出测试通过 Vite 的 raw 模块生成真实源码文件，打包 ZIP 再解压，编译 App.tsx 及其组件与配置依赖。修复 TypeScript 7 CSS 副作用导入需要声明的问题，ZIP 与 npm 包均包含 CSS 类型声明。
 
@@ -11,3 +11,5 @@
 持续动效通过 CSS prefers-reduced-motion 减少，组件回调与数值控制独立于动效开关。相关降级规则已检查源码，未逐一进行操作系统层面的动态效果设置切换。未承诺任意自定义颜色均符合 WCAG 对比标准。
 
 未逐一覆盖 Safari / Firefox / 旧浏览器、所有触摸设备、全部 Next.js 和 SSR 适配器。Next 独立入口保留客户端边界；默认 React 入口不含 use client 指令。
+
+1.0.1：官方源全新安装发现 TypeScript 7 在缺少框架全局 CSS 声明时无法解析 npm 样式入口；为 exports.style.css 添加显式 types 条件，并增加无 Vite 全局声明的独立 TypeScript 接入回归。源码 ZIP 已包含本地 CSS 声明，原导出流程不受影响。
