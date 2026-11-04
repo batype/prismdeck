@@ -1,0 +1,61 @@
+{
+  "name": "@batype/prismdeck",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Configurable spatial React UI primitives with a live material lab and portable source export.",
+  "license": "MIT",
+  "author": "batype",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/batype/prismdeck.git"
+  },
+  "homepage": "https://batype.github.io/prismdeck/",
+  "files": [
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./lib/components/Prism.d.ts",
+      "import": "./lib/components/Prism.js"
+    },
+    "./next": {
+      "types": "./lib/components/next.d.ts",
+      "import": "./lib/components/next.js"
+    },
+    "./config": {
+      "types": "./lib/core/config.d.ts",
+      "import": "./lib/core/config.js"
+    },
+    "./style.css": "./lib/components/prism.css"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "peerDependencies": {
+    "react": ">=18.2.0",
+    "react-dom": ">=18.2.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 4200 --strictPort",
+    "preview": "vite preview --host 127.0.0.1 --port 4201 --strictPort",
+    "build:lib": "tsc -p tsconfig.lib.json && node scripts/copy-css.mjs",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run build:lib && npm run typecheck && vite build",
+    "test": "npm run build:lib && node --test tests/*.test.mjs",
+    "prepack": "npm run build:lib"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "fflate": "0.8.3",
+    "lucide-react": "0.468.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "typescript": "7.0.2",
+    "vite": "8.3.5"
+  }
+}

@@ -1,0 +1,609 @@
+.pd-root {
+  --pd-accent: var(--pd-seed, #c5f86d);
+  --pd-radius: 24px;
+  --pd-glow: 0.45;
+  --pd-duration: 16s;
+  --pd-bg: #171b17;
+  --pd-fg: #eff4eb;
+  --pd-muted: #899085;
+  --pd-line: #ffffff16;
+  --pd-soft: #ffffff06;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "PingFang SC",
+    sans-serif;
+  color: var(--pd-fg);
+  box-sizing: border-box;
+}
+.pd-root * {
+  box-sizing: border-box;
+}
+.pd-root[data-surface="light"] {
+  --pd-accent: color-mix(in srgb, var(--pd-seed, #c5f86d) 42%, #182910);
+  --pd-bg: #ecf0e8;
+  --pd-fg: #192218;
+  --pd-muted: #65705f;
+  --pd-line: #19221820;
+  --pd-soft: #19221808;
+}
+.pd-root button,
+.pd-root input {
+  font: inherit;
+}
+.pd-root button {
+  cursor: pointer;
+}
+.pd-root button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.pd-root button:focus-visible,
+.pd-root input:focus-visible {
+  outline: 2px solid var(--pd-accent);
+  outline-offset: 5px;
+}
+.pd-micro {
+  font:
+    9px/1.5 "SFMono-Regular",
+    Consolas,
+    monospace;
+  letter-spacing: 1.4px;
+}
+.pd-card-wrap {
+  perspective: 1200px;
+  width: 340px;
+  max-width: 100%;
+  padding: 6px;
+}
+.pd-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      ellipse at 50% 25%,
+      color-mix(in srgb, var(--pd-accent) 7%, transparent),
+      transparent 70%
+    ),
+    var(--pd-bg);
+  border: 1px solid var(--pd-line);
+  border-radius: var(--pd-radius);
+  padding: 24px;
+  transform: rotateX(var(--pd-rx, 0deg)) rotateY(var(--pd-ry, 0deg));
+  transition: transform 0.18s ease-out;
+  box-shadow:
+    0 20px 70px #0003,
+    0 0 calc(var(--pd-glow) * 70px)
+      color-mix(in srgb, var(--pd-accent) 9%, transparent);
+}
+.pd-card-glint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--pd-px, 50%) var(--pd-py, 20%),
+    #ffffff08,
+    transparent 45%
+  );
+  z-index: -1;
+}
+.pd-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+}
+.pd-card-head > .pd-micro {
+  color: var(--pd-muted);
+  overflow-wrap: anywhere;
+}
+.pd-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font: 8px monospace;
+  letter-spacing: 1px;
+  color: var(--pd-accent);
+  border: 1px solid color-mix(in srgb, var(--pd-accent) 23%, transparent);
+  background: color-mix(in srgb, var(--pd-accent) 6%, transparent);
+  padding: 5px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.pd-chip i,
+.pd-dial-footer i,
+.pd-dock-system i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--pd-accent);
+  box-shadow: 0 0 8px var(--pd-accent);
+}
+.pd-orbit {
+  position: relative;
+  height: 210px;
+  margin: 15px -10px 2px;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+.pd-orbit-grid {
+  background-image:
+    linear-gradient(var(--pd-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--pd-line) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse, #000 35%, transparent 72%);
+}
+.pd-orbit-axis {
+  position: absolute;
+  width: 205px;
+  height: 205px;
+  border: 1px dashed var(--pd-line);
+  border-radius: 50%;
+}
+.pd-orbit-axis:after {
+  content: "";
+  position: absolute;
+  width: 240px;
+  height: 1px;
+  left: -18px;
+  top: 50%;
+  background: var(--pd-line);
+}
+.pd-core {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 29% 24%,
+    #eaffcc 0%,
+    var(--pd-accent) 12%,
+    color-mix(in srgb, var(--pd-accent) 65%, #192a10) 37%,
+    #0c1a0d 68%,
+    #040904 90%
+  );
+  box-shadow:
+    inset -10px -10px 19px #0009,
+    inset 6px 5px 18px #ffffff39,
+    0 0 calc(10px + var(--pd-glow) * 65px)
+      color-mix(in srgb, var(--pd-accent) 34%, transparent);
+  transform: rotate(-25deg);
+}
+.pd-core-inner {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 4px,
+    #0002 5px,
+    #0002 6px
+  );
+  opacity: 0.4;
+}
+.pd-orbit-ring {
+  position: absolute;
+  width: 183px;
+  height: 68px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--pd-accent) 60%, transparent);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--pd-accent) 20%, transparent);
+  transform: rotate(-28deg);
+  z-index: 1;
+}
+.pd-ring-one:before {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: var(--pd-accent);
+  box-shadow: 0 0 10px var(--pd-accent);
+  border-radius: 50%;
+  top: 12px;
+  left: 20px;
+}
+.pd-ring-two {
+  width: 160px;
+  height: 95px;
+  transform: rotate(58deg);
+  opacity: 0.4;
+  z-index: -1;
+}
+.pd-orbit-coordinate {
+  position: absolute;
+  bottom: 9px;
+  left: 18px;
+  font: 7px monospace;
+  color: var(--pd-muted);
+  letter-spacing: 1px;
+}
+.pd-orbit-marker {
+  position: absolute;
+  top: 18px;
+  right: 25px;
+  color: var(--pd-muted);
+  font: 15px monospace;
+}
+.pd-overline {
+  font: 7px monospace;
+  letter-spacing: 1.5px;
+  color: var(--pd-muted);
+}
+.pd-card-copy h2 {
+  font-size: 36px;
+  line-height: 1.12;
+  letter-spacing: -1.4px;
+  font-weight: 500;
+  margin: 12px 0;
+}
+.pd-card-copy h2 em {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  color: var(--pd-accent);
+}
+.pd-card-copy p {
+  font-size: 10px;
+  line-height: 1.8;
+  color: var(--pd-muted);
+  margin: 12px 0 23px;
+  overflow-wrap: anywhere;
+}
+.pd-card-bottom {
+  border-top: 1px solid var(--pd-line);
+  padding-top: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pd-bars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 20px;
+}
+.pd-bars i {
+  width: 2px;
+  background: var(--pd-accent);
+  opacity: 0.55;
+}
+.pd-connect {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 0;
+  background: none;
+  color: var(--pd-fg);
+  padding: 5px 0;
+  font-size: 10px !important;
+}
+.pd-connect span {
+  font-size: 17px;
+  color: var(--pd-accent);
+}
+.pd-dial-panel {
+  background: var(--pd-bg);
+  border: 1px solid var(--pd-line);
+  border-radius: var(--pd-radius);
+  width: 350px;
+  max-width: 100%;
+  padding: 24px;
+  box-shadow: 0 20px 70px #0003;
+}
+.pd-module-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--pd-muted);
+  font: 9px monospace;
+  letter-spacing: 1px;
+}
+.pd-module-head > span {
+  overflow-wrap: anywhere;
+}
+.pd-module-head > .pd-micro {
+  font-size: 7px;
+  white-space: nowrap;
+}
+.pd-dial-zone {
+  display: grid;
+  place-items: center;
+  padding: 30px 0 14px;
+}
+.pd-dial {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  max-width: 100%;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+.pd-dial-ticks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.pd-dial-ticks line {
+  stroke: var(--pd-line);
+  stroke-width: 1.3;
+}
+.pd-dial-ticks .pd-tick-on {
+  stroke: var(--pd-accent);
+}
+.pd-dial-track {
+  position: absolute;
+  inset: 31px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 225deg,
+    var(--pd-accent) var(--pd-progress),
+    var(--pd-line) 0,
+    var(--pd-line) 75%,
+    transparent 0
+  );
+  mask: radial-gradient(transparent 66%, black 67%);
+}
+.pd-dial-knob {
+  position: absolute;
+  inset: 43px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 20%, #ffffff0b, transparent 60%), var(--pd-bg);
+  box-shadow:
+    inset 0 1px 2px #ffffff1c,
+    0 12px 30px #0005;
+  border: 1px solid var(--pd-line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.pd-dial-pointer {
+  position: absolute;
+  inset: 8px;
+  transform: rotate(var(--pd-turn));
+  pointer-events: none;
+}
+.pd-dial-pointer:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 3px;
+  height: 12px;
+  background: var(--pd-accent);
+  border-radius: 3px;
+  box-shadow: 0 0 calc(var(--pd-glow) * 18px) var(--pd-accent);
+}
+.pd-dial-number {
+  font:
+    44px/1.2 "SFMono-Regular",
+    Consolas,
+    monospace;
+  font-weight: 300;
+  letter-spacing: -3px;
+}
+.pd-dial-number small {
+  font-size: 13px;
+  letter-spacing: 0;
+  color: var(--pd-muted);
+  margin-left: 4px;
+}
+.pd-dial-label {
+  font-size: 9px;
+  color: var(--pd-muted);
+  margin-top: 5px;
+}
+.pd-dial-min,
+.pd-dial-max {
+  position: absolute;
+  bottom: 10px;
+  font: 9px monospace;
+  color: var(--pd-muted);
+}
+.pd-dial-min {
+  left: 38px;
+}
+.pd-dial-max {
+  right: 32px;
+}
+.pd-range-label {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 9px;
+  color: var(--pd-muted);
+  margin: 0 0 24px;
+}
+.pd-range-label span {
+  white-space: nowrap;
+}
+.pd-range-label input {
+  min-width: 0;
+  flex: 1;
+  accent-color: var(--pd-accent);
+  height: 3px;
+  cursor: pointer;
+}
+.pd-dial-footer {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-top: 1px solid var(--pd-line);
+  padding-top: 17px;
+  color: var(--pd-muted);
+  font: 7px monospace;
+  letter-spacing: 1px;
+}
+.pd-dial-footer b {
+  margin-left: auto;
+  font-weight: 400;
+  color: var(--pd-accent);
+}
+.pd-dock-panel {
+  display: inline-flex;
+  max-width: 100%;
+  padding: 6px;
+}
+.pd-dock {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: color-mix(in srgb, var(--pd-bg) 85%, transparent);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--pd-line);
+  border-radius: var(--pd-radius);
+  padding: 11px;
+  box-shadow:
+    0 15px 60px #0004,
+    0 0 calc(var(--pd-glow) * 45px)
+      color-mix(in srgb, var(--pd-accent) 8%, transparent);
+}
+.pd-dock-item {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 49px;
+  height: 49px;
+  border: 1px solid transparent;
+  border-radius: max(5px, calc(var(--pd-radius) - 9px));
+  background: transparent;
+  color: var(--pd-muted);
+  transition:
+    transform 0.2s,
+    background 0.2s,
+    color 0.2s;
+}
+.pd-dock-item svg {
+  width: 21px;
+  height: 21px;
+}
+.pd-dock-item:hover,
+.pd-dock-item:focus-visible {
+  background: var(--pd-soft);
+  color: var(--pd-fg);
+}
+.pd-dock-active {
+  background: color-mix(in srgb, var(--pd-accent) 8%, transparent) !important;
+  color: var(--pd-accent) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--pd-accent) 20%,
+    transparent
+  ) !important;
+}
+.pd-dock-item i {
+  position: absolute;
+  bottom: 4px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--pd-accent);
+  opacity: 0;
+}
+.pd-dock-active i {
+  opacity: 1;
+}
+.pd-dock-tooltip {
+  position: absolute;
+  bottom: calc(100% + 20px);
+  white-space: nowrap;
+  pointer-events: none;
+  padding: 6px 9px;
+  border-radius: 5px;
+  border: 1px solid var(--pd-line);
+  background: var(--pd-bg);
+  color: var(--pd-fg);
+  font-size: 9px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: 0.15s;
+}
+.pd-dock-item:hover .pd-dock-tooltip,
+.pd-dock-item:focus-visible .pd-dock-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+.pd-dock-separator {
+  height: 23px;
+  width: 1px;
+  background: var(--pd-line);
+  margin: 0 4px;
+}
+.pd-dock-system {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  width: 29px;
+  font: 6px monospace;
+  color: var(--pd-muted);
+  letter-spacing: 1px;
+}
+.pd-root[data-motion="on"] .pd-core {
+  animation: pd-breathe var(--pd-duration) ease-in-out infinite;
+}
+.pd-root[data-motion="on"] .pd-ring-one {
+  animation: pd-orbit var(--pd-duration) linear infinite;
+}
+.pd-root[data-motion="on"] .pd-dock-item:hover {
+  transform: translateY(-6px);
+}
+.pd-root[data-motion="off"] .pd-card {
+  transform: none;
+}
+.pd-root[data-motion="off"] .pd-dock-item {
+  transition: none;
+}
+@keyframes pd-breathe {
+  0%,
+  100% {
+    transform: rotate(-25deg) scale(1);
+  }
+  50% {
+    transform: rotate(-15deg) scale(1.04);
+  }
+}
+@keyframes pd-orbit {
+  from {
+    transform: rotate(-28deg);
+  }
+  to {
+    transform: rotate(332deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pd-root * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .pd-root .pd-card {
+    transform: none !important;
+  }
+  .pd-root .pd-dock-item:hover {
+    transform: none !important;
+  }
+}
+@media (max-width: 400px) {
+  .pd-dock {
+    gap: 3px;
+    padding: 8px;
+  }
+  .pd-dock-item {
+    width: 42px;
+    height: 46px;
+  }
+  .pd-dial-panel {
+    padding: 20px;
+  }
+  .pd-card {
+    padding: 20px;
+  }
+}
