@@ -4,6 +4,8 @@
 
 [在线工作台](https://batype.github.io/prismdeck/) · [GitHub](https://github.com/batype/prismdeck)
 
+![PrismDeck 在线工作台](docs/preview.png)
+
 ## 使用 npm 组件
 
 ```sh
