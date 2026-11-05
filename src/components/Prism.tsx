@@ -1,52 +1,7 @@
 import { useRef, useState, type CSSProperties, type ReactNode } from "react";
-import {
-  DEFAULT_CONFIG,
-  clampValue,
-  pointerValue,
-  type PrismConfig,
-} from "../core/config.js";
+import { clampValue, pointerValue, type PrismConfig } from "../core/config.js";
 export type { PrismConfig } from "../core/config.js";
-interface ThemeProps {
-  config?: Partial<PrismConfig>;
-  className?: string;
-}
-function themed(config: Partial<PrismConfig> = {}): {
-  config: PrismConfig;
-  style: CSSProperties;
-} {
-  const c = { ...DEFAULT_CONFIG, ...config };
-  return {
-    config: c,
-    style: {
-      "--pd-seed": c.accent,
-      "--pd-radius": `${c.radius}px`,
-      "--pd-glow": c.glow / 100,
-      "--pd-duration": `${22 - c.speed * 0.17}s`,
-    } as CSSProperties,
-  };
-}
-function Surface({
-  config,
-  children,
-  className = "",
-  style = {},
-}: {
-  config: PrismConfig;
-  children: ReactNode;
-  className?: string;
-  style?: CSSProperties;
-}) {
-  return (
-    <div
-      className={`pd-root ${className}`}
-      data-surface={config.surface}
-      data-motion={config.motion ? "on" : "off"}
-      style={style}
-    >
-      {children}
-    </div>
-  );
-}
+import { themed, Surface, type ThemeProps } from "./theme.js";
 export function SpatialCard({
   config: input,
   className,
@@ -349,3 +304,21 @@ export function CommandDock({
     </Surface>
   );
 }
+
+export {
+  PrismButton,
+  PrismInput,
+  PrismSwitch,
+  PrismTabs,
+  PrismBadge,
+  PrismDialog,
+} from "./Basics.js";
+export type {
+  PrismButtonProps,
+  PrismInputProps,
+  PrismSwitchProps,
+  PrismTabsProps,
+  PrismTabItem,
+  PrismBadgeProps,
+  PrismDialogProps,
+} from "./Basics.js";

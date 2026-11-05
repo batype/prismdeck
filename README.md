@@ -1,6 +1,6 @@
 # PrismDeck · 未来界面实验室
 
-在浏览器中调校空间卡片、轨道旋钮与悬浮导航，实时预览，带走 React + CSS 源码。
+9 个可复用 React 组件：3 个特色交互 + 6 个通用控件。在线调校、实际操作预览，带走 React + CSS 源码。
 
 [在线工作台](https://batype.github.io/prismdeck/) · [GitHub](https://github.com/batype/prismdeck)
 
@@ -29,13 +29,19 @@ export default function Demo() {
 
 需要 React 18.2+。运行时只依赖 React；CSS 独立引入，无需 Tailwind、Canvas、WebGL 或动画运行时。
 
-## 三个可交互原语
+## 组件目录
 
 | 组件 | 核心行为 | 业务接入 |
 | --- | --- | --- |
 | `SpatialCard` | 指针跟随层次、轨道与呼吸动效 | `onAction` 与 `actionLabel` 接入真实动作 |
 | `OrbitDial` | 圆周拖动、0–100 数值控制、标准滑条 | 受控 `value` / `onChange`，支持 `disabled` |
 | `CommandDock` | 图标导航、活动状态、悬停与焦点标签 | 受控 `value` / `onChange`，可自定义 `items` |
+| `PrismButton` | solid / outline / ghost、三种尺寸、加载态 | 原生 button 属性，`loading` 时禁用点击，默认 type=button |
+| `PrismInput` | 标签、辅助文案、错误与禁用态 | 原生 input 属性及 ref，支持受控和 defaultValue |
+| `PrismSwitch` | 设置开关、键盘与原生表单值 | `checked` / `onCheckedChange`、name / value / disabled |
+| `PrismTabs` | 标签页及内容面板 | `items` / `value` / `onValueChange`，方向键、Home / End 跳过禁用项 |
+| `PrismBadge` | 中性 / 成功 / 警告 / 危险状态 | `tone`、`dot` 和原生 span 属性 |
+| `PrismDialog` | 模态窗口、背景隔离、Escape 与焦点恢复 | `open` / `onOpenChange`，title / description / children / footer |
 
 组件回调由业务执行；工作台中的“连接”仅切换本地演示状态，不连接外部服务。未提供回调时，动作按钮或输入禁用，旋钮显示只读。
 
@@ -76,10 +82,10 @@ export default function Demo() {
 
 ## 带走源码
 
-在工作台选组件、调参数，点击“导出组件”下载 ZIP。内容包含：
+在工作台通过“特色交互 / 通用组件”选择组件、调参数，点击“导出组件”下载 ZIP。内容包含：
 
 - 当前组件的 `App.tsx` 使用示例，包含完整主题配置。
-- `components/Prism.tsx`：三个可复用组件原语。
+- `components/Prism.tsx`：全部 9 个组件及共享主题模块。
 - `components/prism.css`：使用 `pd-` 前缀的独立样式。
 - `core/config.ts`、`prismdeck.config.json`、接入说明。
 
@@ -119,6 +125,41 @@ npm run build
 npm run dev
 ```
 
-React + Vite 工作台，独立 TypeScript 配置模块，组件库单独构建。测试覆盖配置边界、分享恢复、旋钮坐标映射、SSR、安全转义，以及三个导出包在独立项目中的实际编译。
+React + Vite 工作台，独立 TypeScript 配置模块，组件库单独构建。测试覆盖配置边界、分享恢复、旋钮坐标映射、SSR、安全转义、通用组件语义与状态，以及全部 9 种导出示例在独立项目中的实际编译。
 
 MIT License.
+
+## 通用组件示例（1.1.0）
+
+```tsx
+import { useState } from 'react';
+import { PrismButton, PrismInput, PrismSwitch, PrismTabs, PrismBadge, PrismDialog } from '@batype/prismdeck';
+import '@batype/prismdeck/style.css';
+
+export default function Settings() {
+  const [name, setName] = useState('My project');
+  const [notify, setNotify] = useState(true);
+  const [open, setOpen] = useState(false);
+  return <>
+    <PrismInput label="项目名称" value={name} onChange={e => setName(e.target.value)}
+      description="显示在工作区中" error={name.trim() ? undefined : '请填写项目名称'} />
+    <PrismSwitch label="消息通知" checked={notify} onCheckedChange={setNotify} name="notify" />
+    <PrismBadge tone="success">已连接</PrismBadge>
+    <PrismButton onClick={() => setOpen(true)}>查看设置</PrismButton>
+    <PrismDialog open={open} onOpenChange={setOpen} title="当前项目"
+      description="可通过 Escape 或关闭按钮退出。"
+      footer={<PrismButton onClick={() => setOpen(false)}>完成</PrismButton>}>
+      {name}
+    </PrismDialog>
+  </>;
+}
+```
+
+- `PrismInput` 的 label 必填，description 与 error 会关联到输入框；传入 ref 指向原生 input。className / style 用于外层容器。文本类输入推荐使用 text / email / password 等原生类型。
+- `PrismSwitch` 没有 onCheckedChange 时禁用；有回调时参与原生表单提交，未选中或禁用时不提交值。
+- `PrismTabs` 的 items 为 `{ value, label, content, disabled? }[]`，value 必须唯一。父层控制当前 value；隐藏面板保持挂载，保留其内部输入状态。标签页采用自动激活，左右方向键循环切换，Home / End 到首尾。
+- `PrismBadge` 的 tone 为 neutral / success / warning / danger；默认不声明 live region，动态状态可由业务外层使用 aria-live。
+- `PrismDialog` 使用现代浏览器的原生 dialog.showModal。title 必填，背景默认可点击关闭；closeOnBackdrop=false 可关闭该行为，Escape 仍可关闭。关闭后恢复之前焦点。不要在内部使用 form method="dialog" 作为主要状态控制方式，使用 onOpenChange 与业务回调。
+- `PrismButton` 的 loading、disabled 与原生 type 可组合。组件不会自动执行异步请求；业务负责设置 loading 和处理结果。
+
+新增组件同样从 `@batype/prismdeck/next` 导出；默认 React / Vite 入口保留原有用法。

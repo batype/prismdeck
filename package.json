@@ -1,6 +1,6 @@
 {
   "name": "@batype/prismdeck",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "type": "module",
   "description": "Configurable spatial React UI primitives with a live material lab and portable source export.",
   "license": "MIT",

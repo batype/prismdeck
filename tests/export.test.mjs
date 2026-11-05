@@ -18,8 +18,10 @@ test("each real source export compiles in an independent React project", async (
   const { makeFiles } = await import(
     pathToFileURL(path.join(bundle, "export.js"))
   );
-  const { DEFAULT_CONFIG } = await import("../lib/core/config.js");
-  for (const kind of ["card", "dial", "dock"]) {
+  const { DEFAULT_CONFIG, COMPONENT_KINDS } = await import(
+    "../lib/core/config.js"
+  );
+  for (const kind of COMPONENT_KINDS) {
     const target = path.join(temp, kind);
     await mkdir(target);
     const files = makeFiles(kind, {

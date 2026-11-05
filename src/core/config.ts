@@ -1,4 +1,21 @@
-export type ComponentKind = "card" | "dial" | "dock";
+export const COMPONENT_KINDS = [
+  "card",
+  "dial",
+  "dock",
+  "button",
+  "input",
+  "switch",
+  "tabs",
+  "badge",
+  "dialog",
+] as const;
+export type ComponentKind = (typeof COMPONENT_KINDS)[number];
+export function isComponentKind(value: unknown): value is ComponentKind {
+  return (
+    typeof value === "string" &&
+    COMPONENT_KINDS.includes(value as ComponentKind)
+  );
+}
 export interface PrismConfig {
   accent: string;
   surface: "dark" | "light";
@@ -118,7 +135,6 @@ export function readShare(
   if (!raw) return null;
   if (raw.length > 4096) throw new Error("分享配置过大");
   const data = JSON.parse(raw);
-  if (!["card", "dial", "dock"].includes(data.kind))
-    throw new Error("组件类型无效");
+  if (!isComponentKind(data.kind)) throw new Error("组件类型无效");
   return { kind: data.kind, config: validateConfig(data.config) };
 }

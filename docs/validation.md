@@ -13,3 +13,13 @@
 未逐一覆盖 Safari / Firefox / 旧浏览器、所有触摸设备、全部 Next.js 和 SSR 适配器。Next 独立入口保留客户端边界；默认 React 入口不含 use client 指令。
 
 1.0.1：官方源全新安装发现 TypeScript 7 在缺少框架全局 CSS 声明时无法解析 npm 样式入口；为 exports.style.css 添加显式 types 条件，并增加无 Vite 全局声明的独立 TypeScript 接入回归。源码 ZIP 已包含本地 CSS 声明，原导出流程不受影响。
+
+## 1.1.0 通用组件（2026-11-05）
+
+新增 PrismButton、PrismInput、PrismSwitch、PrismTabs、PrismBadge、PrismDialog；原 SpatialCard / OrbitDial / CommandDock 的接口保留。共享的原主题实现原样移至 theme.tsx，供两组组件使用。配置 version=1 及原字段保持兼容，组件类型增加六项，工作台增加分类。
+
+14 项测试通过，覆盖新增 SSR 语义、加载禁用、输入 label/描述/错误关联、原生开关表单值、标签页面板及状态、徽标文本转义、模态无浏览器全局导入，以及全部九种导出包的 ZIP 解压与独立 TypeScript 编译。原有配置、分享链接、旋钮坐标、旧组件 SSR 与 CSS 类型入口回归全部通过。
+
+真实浏览器验证：按钮执行后出现禁用加载态，完成计数增加；输入无效邮箱显示错误，改为有效邮箱确认后显示结果；开关鼠标及空格操作；标签页方向键跳过禁用项；模态打开后背景隔离，Escape 关闭并恢复触发按钮焦点。390×844 手机弹窗可输入项目名并确认，结果回显。1440×900 桌面亮色布局可用。弹窗为本地演示，未执行远程写入。
+
+未逐一验证所有浏览器与全部屏幕阅读器。模态依赖现代浏览器原生 dialog；减少动态效果沿用原 CSS 降级。

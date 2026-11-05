@@ -37,9 +37,11 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { BasicsPreview } from "./BasicsPreview";
 import { SpatialCard, OrbitDial, CommandDock } from "../components/Prism";
 import "../components/prism.css";
 import {
+  isComponentKind,
   DEFAULT_CONFIG,
   PRESETS,
   readShare,
@@ -74,6 +76,54 @@ const catalog = [
     description: "让每次切换，都有回应。",
     number: "03",
   },
+  {
+    id: "button" as const,
+    name: "按钮",
+    english: "BUTTON",
+    icon: MousePointer2,
+    description: "按钮层级与加载反馈",
+    number: "04",
+  },
+  {
+    id: "input" as const,
+    name: "输入框",
+    english: "INPUT",
+    icon: Terminal,
+    description: "标签、帮助与校验",
+    number: "05",
+  },
+  {
+    id: "switch" as const,
+    name: "开关",
+    english: "SWITCH",
+    icon: SlidersHorizontal,
+    description: "偏好设置与状态切换",
+    number: "06",
+  },
+  {
+    id: "tabs" as const,
+    name: "标签页",
+    english: "TABS",
+    icon: Layers,
+    description: "组织页面内容",
+    number: "07",
+  },
+  {
+    id: "badge" as const,
+    name: "状态徽标",
+    english: "BADGE",
+    icon: CheckCircle2,
+    description: "清楚表达状态",
+    number: "08",
+  },
+  {
+    id: "dialog" as const,
+    name: "对话框",
+    english: "DIALOG",
+    icon: Box,
+    description: "聚焦重要操作",
+    number: "09",
+  },
 ];
 function initial() {
   try {
@@ -82,7 +132,7 @@ function initial() {
     const raw = localStorage.getItem("prismdeck.design.v1");
     if (raw) {
       const data = JSON.parse(raw);
-      if (["card", "dial", "dock"].includes(data.kind))
+      if (isComponentKind(data.kind))
         return {
           kind: data.kind as ComponentKind,
           config: validateConfig(data.config),
@@ -110,6 +160,12 @@ function App() {
       }
     }),
     [mobileTab, setMobileTab] = useState("preview"),
+    [category, setCategory] = useState(
+      isComponentKind(start.kind) &&
+        !["card", "dial", "dock"].includes(start.kind)
+        ? "base"
+        : "visual",
+    ),
     [codeOpen, setCodeOpen] = useState(false),
     [guideOpen, setGuideOpen] = useState(false),
     [codeTab, setCodeTab] = useState("App.tsx"),
@@ -197,10 +253,13 @@ function App() {
     try {
       if (f.size > 8192) throw new Error("配置文件不能超过 8 KiB");
       const data = JSON.parse(await f.text());
-      if (data.version !== 1 || !["card", "dial", "dock"].includes(data.kind))
+      if (data.version !== 1 || !isComponentKind(data.kind))
         throw new Error("配置版本或组件类型不正确");
       setConfig(validateConfig(data.config));
       setKind(data.kind);
+      setCategory(
+        ["card", "dial", "dock"].includes(data.kind) ? "visual" : "base",
+      );
       setNotice("已导入设计配置。");
     } catch (e) {
       setNotice(e instanceof Error ? e.message : "配置导入失败");
@@ -234,7 +293,7 @@ function App() {
         <div className="top-center">
           <i />
           <span>未来界面实验室</span>
-          <span className="tiny-tag">V.01</span>
+          <span className="tiny-tag">V.1.1</span>
         </div>
         <div className="top-actions">
           <button
@@ -286,50 +345,76 @@ function App() {
         >
           <div className="library-title">
             <span>构建下一种界面。</span>
-            <span className="mono">003</span>
+            <span className="mono">009</span>
           </div>
           <p className="sidebar-intro">小组件，更多可能。</p>
           <div className="section-label">
-            COMPONENTS <span>01—03</span>
+            COMPONENTS <span>01—09</span>
+          </div>
+          <div
+            className="library-categories"
+            role="group"
+            aria-label="组件分类"
+          >
+            <button
+              aria-pressed={category === "visual"}
+              onClick={() => setCategory("visual")}
+            >
+              特色交互 <span>3</span>
+            </button>
+            <button
+              aria-pressed={category === "base"}
+              onClick={() => setCategory("base")}
+            >
+              通用组件 <span>6</span>
+            </button>
           </div>
           <div className="component-list">
-            {catalog.map((c) => (
-              <button
-                key={c.id}
-                className={`component-choice ${kind === c.id ? "selected" : ""}`}
-                onClick={() => choose(c.id)}
-              >
-                <span className={`mini-art mini-${c.id}`} aria-hidden="true">
-                  {c.id === "card" ? (
-                    <>
-                      <i className="mini-sphere" />
-                      <i className="mini-ring" />
-                      <i className="mini-line" />
-                    </>
-                  ) : c.id === "dial" ? (
-                    <>
-                      <i className="mini-dial" />
-                      <span>64</span>
-                    </>
-                  ) : (
-                    <>
-                      <i />
-                      <i />
-                      <i />
-                      <i />
-                    </>
-                  )}
-                </span>
-                <span className="choice-title">
-                  <b>{c.name}</b>
-                  <span>
-                    {c.number}
-                    <ArrowUpRight size={10} />
+            {catalog
+              .filter((c) =>
+                category === "visual"
+                  ? ["card", "dial", "dock"].includes(c.id)
+                  : !["card", "dial", "dock"].includes(c.id),
+              )
+              .map((c) => (
+                <button
+                  key={c.id}
+                  className={`component-choice ${!["card", "dial", "dock"].includes(c.id) ? "basic-choice" : ""} ${kind === c.id ? "selected" : ""}`}
+                  onClick={() => choose(c.id)}
+                >
+                  <span className={`mini-art mini-${c.id}`} aria-hidden="true">
+                    {c.id === "card" ? (
+                      <>
+                        <i className="mini-sphere" />
+                        <i className="mini-ring" />
+                        <i className="mini-line" />
+                      </>
+                    ) : c.id === "dial" ? (
+                      <>
+                        <i className="mini-dial" />
+                        <span>64</span>
+                      </>
+                    ) : c.id === "dock" ? (
+                      <>
+                        <i />
+                        <i />
+                        <i />
+                        <i />
+                      </>
+                    ) : (
+                      <c.icon size={24} />
+                    )}
                   </span>
-                </span>
-                <span className="choice-sub">{c.english}</span>
-              </button>
-            ))}
+                  <span className="choice-title">
+                    <b>{c.name}</b>
+                    <span>
+                      {c.number}
+                      <ArrowUpRight size={10} />
+                    </span>
+                  </span>
+                  <span className="choice-sub">{c.english}</span>
+                </button>
+              ))}
           </div>
           <div className="library-bottom">
             <div className="small-label">
@@ -430,7 +515,7 @@ function App() {
                   />
                 ) : kind === "dial" ? (
                   <OrbitDial config={config} value={dial} onChange={setDial} />
-                ) : (
+                ) : kind === "dock" ? (
                   <div className="dock-demo">
                     <div className="dock-demo-head">
                       <span className="pd-micro">{config.label}</span>
@@ -455,6 +540,8 @@ function App() {
                     />
                     <span className="dock-help">点击切换 · Tab 键导航</span>
                   </div>
+                ) : (
+                  <BasicsPreview kind={kind} config={config} />
                 )}
               </div>
             </div>
@@ -467,7 +554,9 @@ function App() {
                   ? "移动指针感受层次 · 点击建立连接"
                   : kind === "dial"
                     ? "拖动旋钮调值 · 也可使用下方滑条与方向键"
-                    : "悬停查看标签 · 点击切换导航"}
+                    : kind === "dock"
+                      ? "悬停查看标签 · 点击切换导航"
+                      : "可操作演示 · 查看代码以接入你的项目"}
               </span>
             </div>
             <div className="stage-coordinates">
@@ -546,7 +635,7 @@ function App() {
                 />
               </label>
               <label className="field">
-                副文案
+                副文案 / 预览说明
                 <textarea
                   maxLength={100}
                   rows={2}
@@ -743,7 +832,7 @@ function App() {
               <h3>方式二 / 带走源码</h3>
               <p>
                 下载 ZIP 后保留 components 与 core 的目录关系，App.tsx
-                为接入示例。导出包包含全部三个原语，使用示例选中当前组件；组件样式使用
+                为接入示例。导出包包含全部九个组件，使用示例选中当前组件；组件样式使用
                 pd- 前缀。
               </p>
               <h3>Next.js / SSR</h3>
@@ -751,6 +840,11 @@ function App() {
                 Next.js 客户端使用 @batype/prismdeck/next；Vite 等 React
                 项目使用默认入口。导出的交互 App
                 需要客户端边界。无浏览器全局变量在导入时运行，静态初始内容可服务端渲染。
+              </p>
+              <h3>通用组件</h3>
+              <p>
+                PrismButton、PrismInput、PrismSwitch、PrismTabs、PrismBadge、PrismDialog
+                支持相同主题；原生表单属性、加载反馈、键盘标签页与模态交互可直接接入业务。选择组件后查看对应代码示例。
               </p>
               <h3>可访问性</h3>
               <p>
@@ -798,7 +892,7 @@ function App() {
                 {files[codeTab]}
               </pre>
               <div className="modal-foot">
-                <span>ZIP 含组件源码、CSS、配置与使用说明。</span>
+                <span>ZIP 含当前示例、9 个组件源码、CSS 与说明。</span>
                 <button className="primary" onClick={download}>
                   <Download size={14} /> 下载源码 ZIP
                 </button>
