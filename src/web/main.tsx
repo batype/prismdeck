@@ -2,6 +2,12 @@ import React, { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createRoot } from "react-dom/client";
 import { zipSync, strToU8 } from "fflate";
 import {
+  Activity,
+  BarChart3,
+  PieChart,
+  Gauge,
+  CalendarDays,
+  Radar,
   ArrowUpRight,
   ArrowRight,
   ArrowLeft,
@@ -37,6 +43,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { ChartsPreview, CHART_KINDS } from "./ChartsPreview";
 import { BasicsPreview } from "./BasicsPreview";
 import { SpatialCard, OrbitDial, CommandDock } from "../components/Prism";
 import "../components/prism.css";
@@ -124,7 +131,62 @@ const catalog = [
     description: "聚焦重要操作",
     number: "09",
   },
+  {
+    id: "area" as const,
+    name: "趋势面积图",
+    english: "AREA CHART",
+    icon: Activity,
+    description: "每一次增长，都有迹可循。",
+    number: "10",
+  },
+  {
+    id: "bar" as const,
+    name: "柱状图",
+    english: "BAR CHART",
+    icon: BarChart3,
+    description: "让对比变得清晰。",
+    number: "11",
+  },
+  {
+    id: "donut" as const,
+    name: "环形占比图",
+    english: "DONUT CHART",
+    icon: PieChart,
+    description: "看见数据的构成。",
+    number: "12",
+  },
+  {
+    id: "gauge" as const,
+    name: "仪表盘",
+    english: "GAUGE",
+    icon: Gauge,
+    description: "感知关键指标。",
+    number: "13",
+  },
+  {
+    id: "heatmap" as const,
+    name: "活动热力图",
+    english: "HEATMAP",
+    icon: CalendarDays,
+    description: "把时间变成信号。",
+    number: "14",
+  },
+  {
+    id: "radar" as const,
+    name: "雷达图",
+    english: "RADAR CHART",
+    icon: Radar,
+    description: "洞察不同维度。",
+    number: "15",
+  },
 ];
+function categoryFor(kind: ComponentKind) {
+  return CHART_KINDS.includes(kind)
+    ? "charts"
+    : ["card", "dial", "dock"].includes(kind)
+      ? "visual"
+      : "base";
+}
 function initial() {
   try {
     const shared = readShare(location.search);
@@ -160,12 +222,7 @@ function App() {
       }
     }),
     [mobileTab, setMobileTab] = useState("preview"),
-    [category, setCategory] = useState(
-      isComponentKind(start.kind) &&
-        !["card", "dial", "dock"].includes(start.kind)
-        ? "base"
-        : "visual",
-    ),
+    [category, setCategory] = useState(categoryFor(start.kind)),
     [codeOpen, setCodeOpen] = useState(false),
     [guideOpen, setGuideOpen] = useState(false),
     [codeTab, setCodeTab] = useState("App.tsx"),
@@ -257,9 +314,7 @@ function App() {
         throw new Error("配置版本或组件类型不正确");
       setConfig(validateConfig(data.config));
       setKind(data.kind);
-      setCategory(
-        ["card", "dial", "dock"].includes(data.kind) ? "visual" : "base",
-      );
+      setCategory(categoryFor(data.kind));
       setNotice("已导入设计配置。");
     } catch (e) {
       setNotice(e instanceof Error ? e.message : "配置导入失败");
@@ -293,7 +348,7 @@ function App() {
         <div className="top-center">
           <i />
           <span>未来界面实验室</span>
-          <span className="tiny-tag">V.1.1</span>
+          <span className="tiny-tag">V.1.2</span>
         </div>
         <div className="top-actions">
           <button
@@ -345,11 +400,11 @@ function App() {
         >
           <div className="library-title">
             <span>构建下一种界面。</span>
-            <span className="mono">009</span>
+            <span className="mono">015</span>
           </div>
           <p className="sidebar-intro">小组件，更多可能。</p>
           <div className="section-label">
-            COMPONENTS <span>01—09</span>
+            COMPONENTS <span>01—15</span>
           </div>
           <div
             className="library-categories"
@@ -368,14 +423,16 @@ function App() {
             >
               通用组件 <span>6</span>
             </button>
+            <button
+              aria-pressed={category === "charts"}
+              onClick={() => setCategory("charts")}
+            >
+              图形数据 <span>6</span>
+            </button>
           </div>
           <div className="component-list">
             {catalog
-              .filter((c) =>
-                category === "visual"
-                  ? ["card", "dial", "dock"].includes(c.id)
-                  : !["card", "dial", "dock"].includes(c.id),
-              )
+              .filter((c) => categoryFor(c.id) === category)
               .map((c) => (
                 <button
                   key={c.id}
@@ -540,6 +597,8 @@ function App() {
                     />
                     <span className="dock-help">点击切换 · Tab 键导航</span>
                   </div>
+                ) : CHART_KINDS.includes(kind) ? (
+                  <ChartsPreview kind={kind} config={config} />
                 ) : (
                   <BasicsPreview kind={kind} config={config} />
                 )}
@@ -832,8 +891,8 @@ function App() {
               <h3>方式二 / 带走源码</h3>
               <p>
                 下载 ZIP 后保留 components 与 core 的目录关系，App.tsx
-                为接入示例。导出包包含全部九个组件，使用示例选中当前组件；组件样式使用
-                pd- 前缀。
+                为接入示例。导出包包含全部 15
+                个组件，使用示例选中当前组件；组件样式使用 pd- 前缀。
               </p>
               <h3>Next.js / SSR</h3>
               <p>
@@ -845,6 +904,13 @@ function App() {
               <p>
                 PrismButton、PrismInput、PrismSwitch、PrismTabs、PrismBadge、PrismDialog
                 支持相同主题；原生表单属性、加载反馈、键盘标签页与模态交互可直接接入业务。选择组件后查看对应代码示例。
+              </p>
+              <h3>图形数据组件</h3>
+              <p>
+                趋势图、柱状图、环形图、仪表盘、热力图与雷达图，原生
+                SVG，无图表运行时依赖。传入 data（label / value）、title 与可选
+                onSelect 即可使用。仪表盘使用 value / min /
+                max；悬停或聚焦查看数值。
               </p>
               <h3>可访问性</h3>
               <p>
@@ -892,7 +958,7 @@ function App() {
                 {files[codeTab]}
               </pre>
               <div className="modal-foot">
-                <span>ZIP 含当前示例、9 个组件源码、CSS 与说明。</span>
+                <span>ZIP 含当前示例、15 个组件源码、CSS 与说明。</span>
                 <button className="primary" onClick={download}>
                   <Download size={14} /> 下载源码 ZIP
                 </button>

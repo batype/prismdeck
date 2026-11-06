@@ -118,8 +118,8 @@ test("dialogs can render without browser globals and link their accessible name"
   assert.match(html, /aria-label="关闭弹窗"/);
   assert.ok(!/<dialog[^>]* open(?:\s|=|>)/.test(html));
 });
-test("all nine component kinds round-trip shared configuration without breaking old links", () => {
-  assert.equal(COMPONENT_KINDS.length, 9);
+test("all component kinds round-trip shared configuration without breaking old links", () => {
+  assert.equal(COMPONENT_KINDS.length, 15);
   for (const kind of COMPONENT_KINDS) {
     const q = new URLSearchParams({
       design: JSON.stringify({ kind, config: DEFAULT_CONFIG }),

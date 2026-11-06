@@ -8,6 +8,12 @@ export const COMPONENT_KINDS = [
   "tabs",
   "badge",
   "dialog",
+  "area",
+  "bar",
+  "donut",
+  "gauge",
+  "heatmap",
+  "radar",
 ] as const;
 export type ComponentKind = (typeof COMPONENT_KINDS)[number];
 export function isComponentKind(value: unknown): value is ComponentKind {

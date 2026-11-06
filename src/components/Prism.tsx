@@ -322,3 +322,19 @@ export type {
   PrismBadgeProps,
   PrismDialogProps,
 } from "./Basics.js";
+
+export {
+  PrismAreaChart,
+  PrismBarChart,
+  PrismDonutChart,
+  PrismGauge,
+  PrismHeatmap,
+  PrismRadarChart,
+} from "./Charts.js";
+export type {
+  PrismDataPoint,
+  PrismChartProps,
+  PrismGaugeProps,
+  PrismHeatmapProps,
+  PrismRadarChartProps,
+} from "./Charts.js";
