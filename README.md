@@ -2,9 +2,15 @@
 
 15 个可复用 React 组件：3 个特色交互 + 6 个通用控件 + 6 个图形数据组件。在线调校、实际操作预览，带走 React + CSS 源码。
 
-[在线工作台](https://batype.github.io/prismdeck/) · [GitHub](https://github.com/batype/prismdeck)
+[在线工作台](https://batype.github.io/prismdeck/) · [详细接入文档](https://batype.github.io/prismdeck/docs/) · [GitHub](https://github.com/batype/prismdeck)
 
 ![PrismDeck 在线工作台](docs/preview.png)
+
+## 详细文档
+
+[打开独立文档页面](https://batype.github.io/prismdeck/docs/)：安装步骤、React / Vite、Next.js、SSR、主题配置、业务表单、15 个组件的完整示例与 API、数据边界、源码导出及常见问题。
+
+也可以离线阅读 [完整 Markdown 接入文档](docs/guide.md)。页面示例与演示共用同一份源码；更新内容后运行 `npm run docs:sync` 同步 Markdown，正式构建会自动同步。
 
 ## 使用 npm 组件
 

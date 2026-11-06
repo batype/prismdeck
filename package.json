@@ -45,9 +45,10 @@
     "preview": "vite preview --host 127.0.0.1 --port 4201 --strictPort",
     "build:lib": "tsc -p tsconfig.lib.json && node scripts/copy-css.mjs",
     "typecheck": "tsc --noEmit",
-    "build": "npm run build:lib && npm run typecheck && vite build",
+    "build": "npm run build:lib && npm run typecheck && npm run docs:sync && vite build",
     "test": "npm run build:lib && node --test tests/*.test.mjs",
-    "prepack": "npm run build:lib"
+    "prepack": "npm run build:lib",
+    "docs:sync": "node scripts/sync-docs.mjs"
   },
   "devDependencies": {
     "@types/node": "22.19.0",

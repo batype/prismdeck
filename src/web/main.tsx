@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createRoot } from "react-dom/client";
 import { zipSync, strToU8 } from "fflate";
 import {
+  BookOpen,
   Activity,
   BarChart3,
   PieChart,
@@ -62,6 +63,7 @@ import {
   type PrismConfig,
   type ComponentKind,
 } from "../core/config";
+import { documentationUrl } from "../docs/links";
 import { makeFiles } from "../core/export";
 import "./style.css";
 const catalog = [
@@ -231,7 +233,6 @@ function App() {
     [mobileTab, setMobileTab] = useState("preview"),
     [category, setCategory] = useState(categoryFor(start.kind)),
     [codeOpen, setCodeOpen] = useState(false),
-    [guideOpen, setGuideOpen] = useState(false),
     [codeTab, setCodeTab] = useState("App.tsx"),
     [copyState, setCopyState] = useState(""),
     [notice, setNotice] = useState(start.note),
@@ -266,7 +267,7 @@ function App() {
     } catch {}
   }, [theme]);
   useEffect(() => {
-    if (codeOpen || guideOpen) {
+    if (codeOpen) {
       restoreFocus.current = document.activeElement as HTMLElement;
       dialog.current?.showModal();
     }
@@ -274,7 +275,7 @@ function App() {
       dialog.current?.close();
       restoreFocus.current?.focus();
     };
-  }, [codeOpen, guideOpen]);
+  }, [codeOpen]);
   function option<K extends keyof PrismConfig>(key: K, value: PrismConfig[K]) {
     setConfig((c) => ({ ...c, [key]: value }));
   }
@@ -350,7 +351,6 @@ function App() {
   }
   function close() {
     setCodeOpen(false);
-    setGuideOpen(false);
   }
   return (
     <div className={`app ${focused ? "focus-mode" : ""}`}>
@@ -370,12 +370,17 @@ function App() {
           <span className="tiny-tag">V.1.2.1</span>
         </div>
         <div className="top-actions">
-          <button
-            className="text-btn guide-trigger"
-            onClick={() => setGuideOpen(true)}
+          <a
+            className="text-btn docs-trigger"
+            href={documentationUrl()}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="打开接入文档（新页面）"
           >
-            接入指南 <ArrowUpRight size={12} />
-          </button>
+            <BookOpen size={14} />
+            <span>接入文档</span>
+            <ArrowUpRight size={12} />
+          </a>
           <a
             className="icon-btn github"
             href="https://github.com/batype/prismdeck"
@@ -506,9 +511,14 @@ function App() {
               <br />
               预览后，带走你的代码。
             </p>
-            <button onClick={() => setGuideOpen(true)}>
+            <a
+              className="library-docs-link"
+              href={documentationUrl()}
+              target="_blank"
+              rel="noreferrer"
+            >
               如何接入项目 <ArrowUpRight size={13} />
-            </button>
+            </a>
           </div>
           <div className="library-footer">
             <span>REACT + CSS</span>
@@ -925,7 +935,7 @@ function App() {
           PRISMDECK © 2026 <span className="status-plus">+</span>
         </span>
       </footer>
-      {(codeOpen || guideOpen) && (
+      {codeOpen && (
         <dialog
           ref={dialog}
           className="modal"
@@ -937,103 +947,55 @@ function App() {
         >
           <div className="modal-head">
             <div>
-              <span className="section-label">
-                {guideOpen ? "QUICK START" : "READY FOR YOUR PROJECT"}
-              </span>
-              <h2 id="prism-modal-title">
-                {guideOpen ? "把未来感，带进你的项目。" : "代码是你的。"}
-              </h2>
+              <span className="section-label">READY FOR YOUR PROJECT</span>
+              <h2 id="prism-modal-title">代码是你的。</h2>
             </div>
             <button className="icon-btn" aria-label="关闭弹窗" onClick={close}>
               <X size={19} />
             </button>
           </div>
-          {guideOpen ? (
-            <div className="guide">
-              <p>
-                在线调校后，导出 ZIP，将文件放入现有 React + TypeScript
-                项目。组件仅依赖 React，CSS 独立引入。
-              </p>
-              <h3>方式一 / 安装 npm 组件</h3>
-              <pre>npm install @batype/prismdeck</pre>
-              <pre>{`import { SpatialCard } from '@batype/prismdeck';\nimport '@batype/prismdeck/style.css';\n\n<SpatialCard\n  config={{ accent: '${config.accent}' }}\n  onAction={() => console.log('connect')}\n/>`}</pre>
-              <h3>方式二 / 带走源码</h3>
-              <p>
-                下载 ZIP 后保留 components 与 core 的目录关系，App.tsx
-                为接入示例。导出包包含全部 15
-                个组件，使用示例选中当前组件；组件样式使用 pd- 前缀。
-              </p>
-              <h3>Next.js / SSR</h3>
-              <p>
-                Next.js 客户端使用 @batype/prismdeck/next；Vite 等 React
-                项目使用默认入口。导出的交互 App
-                需要客户端边界。无浏览器全局变量在导入时运行，静态初始内容可服务端渲染。
-              </p>
-              <h3>通用组件</h3>
-              <p>
-                PrismButton、PrismInput、PrismSwitch、PrismTabs、PrismBadge、PrismDialog
-                支持相同主题；原生表单属性、加载反馈、键盘标签页与模态交互可直接接入业务。选择组件后查看对应代码示例。
-              </p>
-              <h3>图形数据组件</h3>
-              <p>
-                趋势图、柱状图、环形图、仪表盘、热力图与雷达图，原生
-                SVG，无图表运行时依赖。传入 data（label / value）、title 与可选
-                onSelect 即可使用。仪表盘使用 value / min /
-                max；悬停或聚焦查看数值。
-              </p>
-              <h3>可访问性</h3>
-              <p>
-                支持键盘操作与系统减少动态效果设置。旋钮同时提供标准 range
-                输入。真实业务操作通过回调接入，预览中的连接状态是本地演示。
-              </p>
-              <a
-                href="https://github.com/batype/prismdeck"
-                target="_blank"
-                rel="noreferrer"
+          <a
+            className="code-docs-link"
+            href={documentationUrl(kind)}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <BookOpen size={14} />
+            查看当前组件的参数与完整用法
+            <ArrowUpRight size={12} />
+          </a>
+          <div className="code-tabs" role="tablist" aria-label="导出文件">
+            {[
+              ["App.tsx", "React"],
+              ["components/prism.css", "CSS"],
+              ["prismdeck.config.json", "配置 JSON"],
+            ].map(([id, label]) => (
+              <button
+                key={id}
+                role="tab"
+                aria-selected={codeTab === id}
+                onClick={() => setCodeTab(id)}
               >
-                完整说明与源码 <ArrowUpRight size={13} />
-              </a>
-            </div>
-          ) : (
-            <>
-              <div className="code-tabs" role="tablist" aria-label="导出文件">
-                {[
-                  ["App.tsx", "React"],
-                  ["components/prism.css", "CSS"],
-                  ["prismdeck.config.json", "配置 JSON"],
-                ].map(([id, label]) => (
-                  <button
-                    key={id}
-                    role="tab"
-                    aria-selected={codeTab === id}
-                    onClick={() => setCodeTab(id)}
-                  >
-                    {label}
-                  </button>
-                ))}
-                <button
-                  className="copy-code"
-                  onClick={() => copy(files[codeTab], "code")}
-                >
-                  {copyState === "code" ? (
-                    <Check size={13} />
-                  ) : (
-                    <Copy size={13} />
-                  )}{" "}
-                  {copyState === "code" ? "已复制" : "复制"}
-                </button>
-              </div>
-              <pre className="code-preview" tabIndex={0}>
-                {files[codeTab]}
-              </pre>
-              <div className="modal-foot">
-                <span>ZIP 含当前示例、15 个组件源码、CSS 与说明。</span>
-                <button className="primary" onClick={download}>
-                  <Download size={14} /> 下载源码 ZIP
-                </button>
-              </div>
-            </>
-          )}
+                {label}
+              </button>
+            ))}
+            <button
+              className="copy-code"
+              onClick={() => copy(files[codeTab], "code")}
+            >
+              {copyState === "code" ? <Check size={13} /> : <Copy size={13} />}{" "}
+              {copyState === "code" ? "已复制" : "复制"}
+            </button>
+          </div>
+          <pre className="code-preview" tabIndex={0}>
+            {files[codeTab]}
+          </pre>
+          <div className="modal-foot">
+            <span>ZIP 含当前示例、15 个组件源码、CSS 与说明。</span>
+            <button className="primary" onClick={download}>
+              <Download size={14} /> 下载源码 ZIP
+            </button>
+          </div>
         </dialog>
       )}
       {notice && (
