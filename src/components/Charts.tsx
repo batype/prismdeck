@@ -13,6 +13,9 @@ export interface PrismChartProps extends ThemeProps {
   formatValue?: (value: number) => string;
   onSelect?: (point: PrismDataPoint, index: number) => void;
 }
+export interface PrismCartesianChartProps extends PrismChartProps {
+  formatAxisValue?: (value: number) => string;
+}
 export interface PrismGaugeProps extends ThemeProps {
   title: string;
   value: number;
@@ -33,7 +36,13 @@ const finiteData = (data: readonly PrismDataPoint[]): Entry[] =>
   data.flatMap((point, index) =>
     Number.isFinite(point.value) ? [{ point, index }] : [],
   );
-const plain = (v: number) => String(Number(v.toFixed(2)));
+const plain = (v: number) => {
+  if (v === 0) return "0";
+  const magnitude = Math.abs(v);
+  return magnitude < 0.000001 || magnitude >= 10000000
+    ? v.toExponential(4).replace(/\.?0+e/, "e")
+    : String(Number(v.toPrecision(6)));
+};
 const tone = (i: number) => `var(--pd-chart-${i % 5})`;
 function Frame({
   title,
@@ -145,7 +154,7 @@ function Grid({
     </g>
   );
 }
-export function PrismAreaChart(props: PrismChartProps) {
+export function PrismAreaChart(props: PrismCartesianChartProps) {
   const entries = finiteData(props.data),
     values = entries.map((e) => e.point.value);
   // Divide before subtracting so even very large finite inputs retain finite SVG coordinates.
@@ -173,7 +182,11 @@ export function PrismAreaChart(props: PrismChartProps) {
               <stop offset="1" stopColor="var(--pd-accent)" stopOpacity="0" />
             </linearGradient>
           </defs>
-          <Grid min={lo * scale} max={hi * scale} format={plain} />
+          <Grid
+            min={lo * scale}
+            max={(hi || (lo === 0 ? 1 : 0)) * scale}
+            format={props.formatAxisValue ?? props.formatValue ?? plain}
+          />
           {entries.length > 1 && (
             <path
               d={`${path} L${x(entries.length - 1)},${y(0)} L${x(0)},${y(0)} Z`}
@@ -222,7 +235,7 @@ export function PrismAreaChart(props: PrismChartProps) {
     </Frame>
   );
 }
-export function PrismBarChart(props: PrismChartProps) {
+export function PrismBarChart(props: PrismCartesianChartProps) {
   const entries = finiteData(props.data),
     values = entries.map((e) => e.point.value),
     scale = Math.max(1, ...values.map(Math.abs));
@@ -239,7 +252,11 @@ export function PrismBarChart(props: PrismChartProps) {
     >
       {({ active, inspect, select }) => (
         <svg viewBox="0 0 490 230" aria-hidden="true" className="pd-chart-svg">
-          <Grid min={lo * scale} max={hi * scale} format={plain} />
+          <Grid
+            min={lo * scale}
+            max={(hi || (lo === 0 ? 1 : 0)) * scale}
+            format={props.formatAxisValue ?? props.formatValue ?? plain}
+          />
           <line
             x1="48"
             x2="468"

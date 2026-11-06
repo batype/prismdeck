@@ -18,17 +18,44 @@ test("each real source export compiles in an independent React project", async (
   const { makeFiles } = await import(
     pathToFileURL(path.join(bundle, "export.js"))
   );
-  const { DEFAULT_CONFIG, COMPONENT_KINDS } = await import(
-    "../lib/core/config.js"
-  );
+  const { DEFAULT_CONFIG, COMPONENT_KINDS } =
+    await import("../lib/core/config.js");
+  const { createChartDesigns, isChartKind, readDesign } =
+    await import("../lib/core/workspace.js");
+  const charts = createChartDesigns();
+  charts.gauge = {
+    ...charts.gauge,
+    value: 35,
+    title: '导出 "35" <demo>',
+    unit: "ms",
+    min: -20,
+    max: 80,
+  };
+  charts.area.data = [
+    { label: 'A " \u2028 <tag>', value: 0.0001 },
+    { label: "B", value: 0.0002 },
+  ];
   for (const kind of COMPONENT_KINDS) {
     const target = path.join(temp, kind);
     await mkdir(target);
-    const files = makeFiles(kind, {
-      ...DEFAULT_CONFIG,
-      caption: '文字 " / <tag> 🚀',
-      radius: 0,
-    });
+    const files = makeFiles(
+      kind,
+      {
+        ...DEFAULT_CONFIG,
+        caption: '文字 " / <tag> 🚀',
+        radius: 0,
+      },
+      charts,
+    );
+    if (isChartKind(kind)) {
+      const restoredDesign = readDesign(
+        JSON.parse(files["prismdeck.config.json"]),
+      );
+      assert.deepEqual(restoredDesign.charts[kind], charts[kind]);
+      assert.ok(
+        files["App.tsx"].includes(JSON.stringify(charts[kind], null, 2)),
+      );
+    }
     const zipped = zipSync(
       Object.fromEntries(
         Object.entries(files).map(([k, v]) => [k, strToU8(v)]),

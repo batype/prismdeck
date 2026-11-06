@@ -334,6 +334,7 @@ export {
 export type {
   PrismDataPoint,
   PrismChartProps,
+  PrismCartesianChartProps,
   PrismGaugeProps,
   PrismHeatmapProps,
   PrismRadarChartProps,

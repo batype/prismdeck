@@ -43,16 +43,22 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { ChartsPreview, CHART_KINDS } from "./ChartsPreview";
+import { ChartsPreview } from "./ChartsPreview";
+import { ChartControls } from "./ChartControls";
+import {
+  createChartDesigns,
+  isChartKind,
+  readDesign,
+  readDesignShare,
+  type ChartDesign,
+  type ChartDesigns,
+} from "../core/workspace";
 import { BasicsPreview } from "./BasicsPreview";
 import { SpatialCard, OrbitDial, CommandDock } from "../components/Prism";
 import "../components/prism.css";
 import {
-  isComponentKind,
   DEFAULT_CONFIG,
   PRESETS,
-  readShare,
-  validateConfig,
   type PrismConfig,
   type ComponentKind,
 } from "../core/config";
@@ -181,7 +187,7 @@ const catalog = [
   },
 ];
 function categoryFor(kind: ComponentKind) {
-  return CHART_KINDS.includes(kind)
+  return isChartKind(kind)
     ? "charts"
     : ["card", "dial", "dock"].includes(kind)
       ? "visual"
@@ -189,31 +195,32 @@ function categoryFor(kind: ComponentKind) {
 }
 function initial() {
   try {
-    const shared = readShare(location.search);
+    const shared = readDesignShare(location.search);
     if (shared) return { ...shared, note: "已载入分享的设计" };
     const raw = localStorage.getItem("prismdeck.design.v1");
     if (raw) {
-      const data = JSON.parse(raw);
-      if (isComponentKind(data.kind))
-        return {
-          kind: data.kind as ComponentKind,
-          config: validateConfig(data.config),
-          note: "",
-        };
+      return { ...readDesign(JSON.parse(raw)), note: "" };
     }
   } catch {
     return {
       kind: "card" as ComponentKind,
       config: DEFAULT_CONFIG,
+      charts: createChartDesigns(),
       note: "保存的配置或分享链接无法读取，已使用默认设计。",
     };
   }
-  return { kind: "card" as ComponentKind, config: DEFAULT_CONFIG, note: "" };
+  return {
+    kind: "card" as ComponentKind,
+    config: DEFAULT_CONFIG,
+    charts: createChartDesigns(),
+    note: "",
+  };
 }
 function App() {
   const [start] = useState(initial),
     [kind, setKind] = useState<ComponentKind>(start.kind),
     [config, setConfig] = useState<PrismConfig>(start.config),
+    [charts, setCharts] = useState<ChartDesigns>(start.charts),
     [theme, setTheme] = useState(() => {
       try {
         return localStorage.getItem("prismdeck.chrome.v1") || "dark";
@@ -238,7 +245,7 @@ function App() {
     restoreFocus = useRef<HTMLElement | null>(null),
     dialog = useRef<HTMLDialogElement>(null);
   const item = catalog.find((i) => i.id === kind)!,
-    files = makeFiles(kind, config);
+    files = makeFiles(kind, config, charts);
   const activePreset = PRESETS.find(
     (p) => JSON.stringify(p.config) === JSON.stringify(config),
   );
@@ -246,12 +253,12 @@ function App() {
     try {
       localStorage.setItem(
         "prismdeck.design.v1",
-        JSON.stringify({ kind, config }),
+        JSON.stringify({ kind, config, charts }),
       );
     } catch {
       setNotice("浏览器保存不可用；可以下载配置保留设计。");
     }
-  }, [kind, config]);
+  }, [kind, config, charts]);
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     try {
@@ -270,6 +277,10 @@ function App() {
   }, [codeOpen, guideOpen]);
   function option<K extends keyof PrismConfig>(key: K, value: PrismConfig[K]) {
     setConfig((c) => ({ ...c, [key]: value }));
+  }
+  function chartOption(change: Partial<ChartDesign>) {
+    if (isChartKind(kind))
+      setCharts((c) => ({ ...c, [kind]: { ...c[kind], ...change } }));
   }
   function choose(id: ComponentKind) {
     setKind(id);
@@ -308,11 +319,10 @@ function App() {
   async function importConfig(f?: File) {
     if (!f) return;
     try {
-      if (f.size > 8192) throw new Error("配置文件不能超过 8 KiB");
-      const data = JSON.parse(await f.text());
-      if (data.version !== 1 || !isComponentKind(data.kind))
-        throw new Error("配置版本或组件类型不正确");
-      setConfig(validateConfig(data.config));
+      if (f.size > 262144) throw new Error("配置文件不能超过 256 KiB");
+      const data = readDesign(JSON.parse(await f.text()));
+      setConfig(data.config);
+      setCharts(data.charts);
       setKind(data.kind);
       setCategory(categoryFor(data.kind));
       setNotice("已导入设计配置。");
@@ -326,7 +336,16 @@ function App() {
     const url = new URL(location.href);
     url.hash = "";
     url.search = "";
-    url.searchParams.set("design", JSON.stringify({ kind, config }));
+    const design = JSON.stringify({
+      kind,
+      config,
+      ...(isChartKind(kind) ? { charts: { [kind]: charts[kind] } } : {}),
+    });
+    if (design.length > 16384) {
+      setNotice("数据较多，分享链接超过限制；请使用保存配置或下载源码。");
+      return;
+    }
+    url.searchParams.set("design", design);
     void copy(url.href, "share");
   }
   function close() {
@@ -348,7 +367,7 @@ function App() {
         <div className="top-center">
           <i />
           <span>未来界面实验室</span>
-          <span className="tiny-tag">V.1.2</span>
+          <span className="tiny-tag">V.1.2.1</span>
         </div>
         <div className="top-actions">
           <button
@@ -597,8 +616,13 @@ function App() {
                     />
                     <span className="dock-help">点击切换 · Tab 键导航</span>
                   </div>
-                ) : CHART_KINDS.includes(kind) ? (
-                  <ChartsPreview kind={kind} config={config} />
+                ) : isChartKind(kind) ? (
+                  <ChartsPreview
+                    kind={kind}
+                    config={config}
+                    design={charts[kind]}
+                    onChange={chartOption}
+                  />
                 ) : (
                   <BasicsPreview kind={kind} config={config} />
                 )}
@@ -673,7 +697,12 @@ function App() {
               aria-label="重置当前设计"
               onClick={() => {
                 setConfig({ ...DEFAULT_CONFIG });
-                setNotice("已恢复默认参数。");
+                if (isChartKind(kind))
+                  setCharts((c) => ({
+                    ...c,
+                    [kind]: createChartDesigns()[kind],
+                  }));
+                setNotice("已恢复当前组件默认参数。");
               }}
             >
               <RotateCcw size={13} />
@@ -682,26 +711,40 @@ function App() {
           <div className="inspector-body">
             <div className="inspector-section">
               <div className="section-label">
-                IDENTITY <span>01</span>
+                {isChartKind(kind) ? "CHART CONTENT" : "IDENTITY"}{" "}
+                <span>01</span>
               </div>
-              <label className="field">
-                标题标识
-                <input
-                  maxLength={40}
-                  value={config.label}
-                  onChange={(e) => option("label", e.target.value)}
-                  placeholder="NEURAL CORE"
+              {isChartKind(kind) ? (
+                <ChartControls
+                  key={kind}
+                  kind={kind}
+                  design={charts[kind]}
+                  onChange={chartOption}
                 />
-              </label>
-              <label className="field">
-                副文案 / 预览说明
-                <textarea
-                  maxLength={100}
-                  rows={2}
-                  value={config.caption}
-                  onChange={(e) => option("caption", e.target.value)}
-                />
-              </label>
+              ) : (
+                <>
+                  <label className="field">
+                    标题标识
+                    <input
+                      maxLength={40}
+                      value={config.label}
+                      onChange={(e) => option("label", e.target.value)}
+                      placeholder="NEURAL CORE"
+                    />
+                  </label>
+                  {["card", "dock", "tabs"].includes(kind) && (
+                    <label className="field">
+                      副文案 / 预览说明
+                      <textarea
+                        maxLength={100}
+                        rows={2}
+                        value={config.caption}
+                        onChange={(e) => option("caption", e.target.value)}
+                      />
+                    </label>
+                  )}
+                </>
+              )}
             </div>
             <div className="inspector-section">
               <div className="section-label">
@@ -755,48 +798,74 @@ function App() {
                   </button>
                 </div>
               </div>
-              <Range
-                label="圆角"
-                value={config.radius}
-                max={40}
-                suffix="px"
-                onChange={(v) => option("radius", v)}
-              />
-              <Range
-                label="光晕强度"
-                value={config.glow}
-                max={100}
-                suffix="%"
-                onChange={(v) => option("glow", v)}
-              />
+              {!["badge", "switch"].includes(kind) && (
+                <Range
+                  label="圆角"
+                  value={config.radius}
+                  max={40}
+                  suffix="px"
+                  onChange={(v) => option("radius", v)}
+                />
+              )}
+              {!["input", "switch", "tabs", "badge"].includes(kind) && (
+                <Range
+                  label="光晕强度"
+                  value={config.glow}
+                  max={100}
+                  suffix="%"
+                  onChange={(v) => option("glow", v)}
+                />
+              )}
             </div>
-            <div className="inspector-section">
-              <div className="section-label">
-                BEHAVIOR <span>03</span>
+            {(kind === "card" ||
+              kind === "dock" ||
+              kind === "dialog" ||
+              kind === "button" ||
+              kind === "gauge") && (
+              <div className="inspector-section">
+                <div className="section-label">
+                  BEHAVIOR <span>03</span>
+                </div>
+                <Switch
+                  label="动态效果"
+                  description={
+                    kind === "gauge"
+                      ? "数值更新时的过渡动效"
+                      : kind === "button"
+                        ? "加载指示器动效"
+                        : kind === "dialog"
+                          ? "弹窗进入动效"
+                          : kind === "dock"
+                            ? "导航悬停位移"
+                            : "呼吸光效与指针反馈"
+                  }
+                  checked={config.motion}
+                  onChange={(v) => option("motion", v)}
+                />
+                {kind === "card" && (
+                  <Range
+                    label="动效速度"
+                    value={config.speed}
+                    max={100}
+                    suffix="%"
+                    disabled={!config.motion}
+                    onChange={(v) => option("speed", v)}
+                  />
+                )}
+                {kind === "card" && (
+                  <Switch
+                    label="组件辅助网格"
+                    description={
+                      kind === "card"
+                        ? "空间卡片内的刻度网格"
+                        : "用于空间卡片预设"
+                    }
+                    checked={config.grid}
+                    onChange={(v) => option("grid", v)}
+                  />
+                )}
               </div>
-              <Switch
-                label="动态效果"
-                description="呼吸光效与指针反馈"
-                checked={config.motion}
-                onChange={(v) => option("motion", v)}
-              />
-              <Range
-                label="动效速度"
-                value={config.speed}
-                max={100}
-                suffix="%"
-                disabled={!config.motion}
-                onChange={(v) => option("speed", v)}
-              />
-              <Switch
-                label="组件辅助网格"
-                description={
-                  kind === "card" ? "空间卡片内的刻度网格" : "用于空间卡片预设"
-                }
-                checked={config.grid}
-                onChange={(v) => option("grid", v)}
-              />
-            </div>
+            )}
             <div className="config-ops">
               <button onClick={() => uploader.current?.click()}>
                 <Upload size={12} /> 导入配置
@@ -824,7 +893,7 @@ function App() {
             <div className="inspector-note">
               <CheckCircle2 size={13} />
               <p>
-                调整会自动保存在此浏览器。
+                材质与已应用的图表配置自动保存在此浏览器。
                 <br />
                 导出组件无需运行时动画依赖。
               </p>

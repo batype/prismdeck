@@ -174,3 +174,42 @@ test("multiple area charts use independent gradient ids and Next exports match",
   ])
     assert.equal(next[C.name], C);
 });
+
+test("small and scientific values keep distinct readable ticks, including custom axis formatting", () => {
+  for (const C of [PrismAreaChart, PrismBarChart]) {
+    const small = [
+      { label: "A", value: 0.0001 },
+      { label: "B", value: 0.0002 },
+    ];
+    const html = render(C, { title: "precision", data: small });
+    const ticks = [
+      ...html.matchAll(/<text\b[^>]*text-anchor="end"[^>]*>(.*?)<\/text>/g),
+    ].map((m) => m[1]);
+    assert.ok(new Set(ticks).size > 1);
+    assert.ok(ticks.includes("0.0002"));
+    const custom = render(C, {
+      title: "custom",
+      data: small,
+      formatAxisValue: (n) => `${n.toExponential(1)} s`,
+      formatValue: (n) => `value ${n}`,
+    });
+    assert.match(custom, /2\.0e-4 s/);
+    assert.match(custom, /value 0\.0001/);
+    const tiny = render(C, {
+      title: "tiny",
+      data: [
+        { label: "a", value: 1e-12 },
+        { label: "b", value: 2e-12 },
+      ],
+    });
+    assert.match(tiny, /2e-12/);
+    const zeros = render(C, {
+      title: "zero",
+      data: [
+        { label: "a", value: 0 },
+        { label: "b", value: 0 },
+      ],
+    });
+    assert.match(zeros, />1<\/text>/);
+  }
+});
